@@ -81,7 +81,7 @@ async function initializeSchema() {
 
     // Seed default admin user if not exists
     console.log('Checking for default admin user...');
-    const [adminRows] = await db.query('SELECT id FROM users WHERE username = ?', ['admin']);
+    const [adminRows] = await db.query('SELECT id, password FROM users WHERE username = ?', ['admin']);
     
     if (adminRows.length === 0) {
       console.log('Creating default admin user...');
@@ -92,7 +92,15 @@ async function initializeSchema() {
       );
       console.log('✓ Default admin user created (username: admin, password: admin123)');
     } else {
-      console.log('✓ Admin user already exists');
+      const adminUser = adminRows[0];
+      if (adminUser.password === 'admin123') {
+        console.log('Updating default admin password to hashed form...');
+        const passwordHash = await bcrypt.hash('admin123', 10);
+        await db.query('UPDATE users SET password = ? WHERE id = ?', [passwordHash, adminUser.id]);
+        console.log('✓ Admin password rehashed successfully');
+      } else {
+        console.log('✓ Admin user already exists');
+      }
     }
 
     console.log('✓ Database initialization completed successfully!\n');

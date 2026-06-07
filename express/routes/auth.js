@@ -54,7 +54,10 @@ router.post('/login', async function (req, res) {
       return res.status(400).json({ success: false, message: 'Username dan password harus diisi.' });
     }
 
-    const [rows] = await db.query('SELECT id, username, email, password, role FROM users WHERE username = ?', [username]);
+    const [rows] = await db.query(
+      'SELECT id, username, email, password, role FROM users WHERE username = ? OR email = ?',
+      [username, username]
+    );
     if (rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Username atau password salah.' });
     }
@@ -89,9 +92,10 @@ router.post('/google', async function (req, res) {
     const [rows] = await db.query('SELECT id, username, email, role FROM users WHERE email = ?', [email]);
     let user = rows[0];
     if (!user) {
+      const generatedHash = await bcrypt.hash(Math.random().toString(36).substring(2, 15), 10);
       const [insertResult] = await db.query(
         'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
-        [username, email, '', 'user']
+        [username, email, generatedHash, 'user']
       );
       user = { id: insertResult.insertId, username, email, role: 'user' };
     }
