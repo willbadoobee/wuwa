@@ -7,6 +7,10 @@
 var app = require('../app');
 var debug = require('debug')('express:server');
 var http = require('http');
+<<<<<<< HEAD
+=======
+var db = require('../database/database');
+>>>>>>> 7036f0e (backend + update frontend & database)
 
 /**
  * Get port from environment and store in Express.
@@ -22,12 +26,41 @@ app.set('port', port);
 var server = http.createServer(app);
 
 /**
+<<<<<<< HEAD
  * Listen on provided port, on all network interfaces.
  */
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+=======
+ * Initialize database and listen on provided port
+ */
+
+async function startServer() {
+  try {
+    console.log('\n========== DATABASE INITIALIZATION ==========\n');
+    
+    // Initialize database schema and seed data
+    const initSuccess = await db.initialize();
+    
+    if (!initSuccess) {
+      console.error('\n✗ Failed to initialize database. Some features may not work.\n');
+      console.error('Please check your MySQL connection and try again.\n');
+    }
+    
+    console.log('========== STARTING SERVER ==========\n');
+    
+    // Listen on provided port, on all network interfaces.
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  } catch (error) {
+    console.error('Fatal error during startup:', error);
+    process.exit(1);
+  }
+}
+>>>>>>> 7036f0e (backend + update frontend & database)
 
 /**
  * Normalize a port into a number, string, or false.
@@ -86,5 +119,14 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
+<<<<<<< HEAD
   debug('Listening on ' + bind);
 }
+=======
+  console.log('✓ Server listening on ' + bind + '\n');
+  console.log('Frontend dapat mengakses backend di: http://localhost:' + addr.port + '/api\n');
+}
+
+// Start the server
+startServer();
+>>>>>>> 7036f0e (backend + update frontend & database)
